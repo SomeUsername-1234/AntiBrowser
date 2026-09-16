@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AntiBrowser</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body, html {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background-color: #1e1e2e;
+      color: #cdd6f4;
+    }
+
+    #browser-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    #nav-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background-color: #181825;
+      border-bottom: 1px solid #313244;
+    }
+
+    .nav-btn {
+      background: #313244;
+      color: #cdd6f4;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .nav-btn:hover {
+      background: #45475a;
+    }
+
+    #url-input {
+      flex: 1;
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: 1px solid #45475a;
+      background-color: #11111b;
+      color: #a6adc8;
+      font-size: 14px;
+      outline: none;
+    }
+
+    #url-input:focus {
+      border-color: #89b4fa;
+      color: #cdd6f4;
+    }
+
+    select {
+      background: #313244;
+      color: #cdd6f4;
+      border: 1px solid #45475a;
+      padding: 6px 10px;
+      border-radius: 6px;
+      outline: none;
+      font-size: 13px;
+    }
+
+    #viewport {
+      flex: 1;
+      width: 100%;
+      border: none;
+      background-color: #ffffff;
+    }
+
+    #notice {
+      padding: 6px 12px;
+      background-color: #313244;
+      font-size: 12px;
+      color: #a6adc8;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="browser-container">
+    <div id="nav-bar">
+      <button class="nav-btn" onclick="reloadPage()">↻ Refresh</button>
+      
+      <select id="proxy-mode">
+        <option value="proxy">Proxy Mode (Bypass X-Frame)</option>
+        <option value="direct">Direct Mode (No Proxy)</option>
+      </select>
+
+      <input type="text" id="url-input" placeholder="Enter URL (e.g. example.com) and press Enter" onkeydown="handleKeyPress(event)" />
+      <button class="nav-btn" onclick="loadUrl()">Go</button>
+    </div>
+
+    <iframe id="viewport" src="about:blank"></iframe>
+
+    <div id="notice">
+      Proxy mode routes requests through a CORS gateway to remove X-Frame-Options blocking.
+    </div>
+  </div>
+
+  <script>
+    function loadUrl() {
+      const input = document.getElementById('url-input');
+      const mode = document.getElementById('proxy-mode').value;
+      let targetUrl = input.value.trim();
+
+      if (!targetUrl) return;
+
+      // Normalize missing protocol
+      if (!/^https?:\/\//i.test(targetUrl)) {
+        targetUrl = 'https://' + targetUrl;
+      }
+
+      const viewport = document.getElementById('viewport');
+
+      if (mode === 'proxy') {
+        // Routes through a public header-stripping proxy
+        viewport.src = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+      } else {
+        viewport.src = targetUrl;
+      }
+    }
+
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+        loadUrl();
+      }
+    }
+
+    function reloadPage() {
+      const viewport = document.getElementById('viewport');
+      if (viewport.src && viewport.src !== 'about:blank') {
+        viewport.src = viewport.src;
+      }
+    }
+  </script>
+
+</body>
+</html>
